@@ -1,32 +1,70 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import Home from './pages/Home';
+import AddEvent from './pages/AddEvent';
+import AdminPanel from './pages/AdminPanel';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Home from './pages/Home';
-import { auth } from '../firebaseConfig';
-import Events from './pages/Events';
+import Profile from './pages/Profile';
+import { auth, db } from '../firebaseConfig';
+import Navbar from './components/Navbar';
+import { UserProvider } from './UserContext';
 
 function App() {
-  const [user, setUser] = React.useState(null);
+  const [user, setUser] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  console.log(user);
+  console.log(userInfo)
 
-  React.useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setUser(user);
+      setLoading(false);
+
+      if (user) {
+       
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          setUserInfo(userDoc.data());
+        } 
+        else {
+          // Kullanıcı belgesi yoksa oluştur
+          const userData = {
+            email: user.email,
+            name: user.displayName || 'Anonim',
+            role: 'user' // Varsayılan rol
+          };
+          await setDoc(userDocRef, userData);
+          setUserInfo(userData);
+        }
+      }
     });
     return unsubscribe;
   }, []);
 
+  if (loading) {
+    return <p>Yükleniyor...</p>;
+  }
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-        <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
-        <Route path="/events" element={user ? <Navigate to="/" /> : <Events />} />
-        <Route path="/" element={user ? <Home /> : <Navigate to="/login" />} />
-      </Routes>
-    </Router>
+    <UserProvider>
+    
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/add-event" element={<AddEvent />} />
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+      </Router>
+    
+    </UserProvider>
   );
 }
 

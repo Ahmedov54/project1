@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
-
+import { UserContext } from '../UserContext';
 
 function Navbar() {
+  const userInfo = useContext(UserContext);
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -13,15 +14,15 @@ function Navbar() {
       alert('Çıkış başarısız: ' + error.message);
     }
   };
-
+console.log(userInfo)
   return (
     <nav>
       <h1>Okul Etkinlikleri</h1>
       <ul>
-        <li><Link to="/">Anasayfa</Link></li>
-        <li><Link to="/events">Etkinlikler</Link></li>
+        <li><Link to="/">Ana Sayfa</Link></li>
         <li><Link to="/profile">Profil</Link></li>
-        <li><Link to="/admin">Yönetici Paneli</Link></li>
+        <li><Link to="/add-event">Etkinlik Ekle</Link></li>
+       {userInfo?.role === "admin" &&  <li><Link to="/admin">Admin Panel</Link></li>}
       </ul>
       <button onClick={handleLogout}>Çıkış Yap</button>
     </nav>
