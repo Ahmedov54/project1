@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert('Giriş başarılı!');
+      navigate('/'); // Anasayfaya yönlendir
     } catch (error) {
       alert('Giriş başarısız: ' + error.message);
     }
@@ -21,6 +24,7 @@ function Login() {
     try {
       await signInWithPopup(auth, provider);
       alert('Google ile giriş başarılı!');
+      navigate('/'); // Anasayfaya yönlendir
     } catch (error) {
       alert('Google ile giriş başarısız: ' + error.message);
     }

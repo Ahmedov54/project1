@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import Home from './pages/Home';
 import AddEvent from './pages/AddEvent';
@@ -16,27 +16,23 @@ function App() {
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  console.log(userInfo)
-
+  // Firebase auth listener with user doc retrieval
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setUser(user);
       setLoading(false);
 
       if (user) {
-       
         const userDocRef = doc(db, 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
           setUserInfo(userDoc.data());
-        } 
-        else {
-          // Kullanıcı belgesi yoksa oluştur
+        } else {
           const userData = {
             email: user.email,
             name: user.displayName || 'Anonim',
-            role: 'user' // Varsayılan rol
+            role: 'user'
           };
           await setDoc(userDocRef, userData);
           setUserInfo(userData);
@@ -52,18 +48,25 @@ function App() {
 
   return (
     <UserProvider>
-    
       <Router>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/add-event" element={<AddEvent />} />
-          <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
+          {!user ? (
+            <>
+              <Route path="/login" element={<Login />} />
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </>
+          ) : (
+            <>
+              <Route path="/" element={<Home />} />
+              <Route path="/add-event" element={<AddEvent />} />
+              <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/profile" element={<Profile />} />
+            </>
+          )}
         </Routes>
       </Router>
-    
     </UserProvider>
   );
 }

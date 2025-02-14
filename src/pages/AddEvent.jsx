@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db, auth } from '../../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../UserContext';
 
-const allowedEmails = ["ahmetefeu2025@stu.koc.k12.tr"];
 
 function AddEvent() {
   const [title, setTitle] = useState('');
@@ -14,10 +14,16 @@ function AddEvent() {
   const [description, setDescription] = useState('');
   const [isAllowed, setIsAllowed] = useState(false);
   const navigate = useNavigate();
+  const userInfo = useContext(UserContext);
+  console.log(userInfo);
 
   useEffect(() => {
     const checkEmail = () => {
-      if (auth.currentUser && allowedEmails.includes(auth.currentUser.email)) {
+      if (userInfo === undefined) {
+        // userInfo henüz yüklenmediyse beklemek için.
+        return;
+      }
+      if (auth.currentUser && userInfo && userInfo?.role === 'admin') {
         setIsAllowed(true);
       } else {
         alert('Bu sayfaya erişim izniniz yok.');
@@ -26,7 +32,7 @@ function AddEvent() {
     };
 
     checkEmail();
-  }, [navigate]);
+  }, [navigate, userInfo]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
