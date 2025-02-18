@@ -13,6 +13,8 @@ function AddEvent() {
   const [endTime, setEndTime] = useState('');
   const [description, setDescription] = useState('');
   const [isAllowed, setIsAllowed] = useState(false);
+  const [category, setCategory] = useState('');
+  const [isAnonymousEvent, setIsAnonymousEvent] = useState(false);
   const navigate = useNavigate();
   const userInfo = useContext(UserContext);
   console.log(userInfo);
@@ -23,7 +25,8 @@ function AddEvent() {
         // userInfo henüz yüklenmediyse beklemek için.
         return;
       }
-      if (auth.currentUser && userInfo && userInfo?.role === 'admin') {
+      // admin veya eventadder yetkisi varsa erişime izin ver.
+      if (auth.currentUser && userInfo && (userInfo?.role === 'admin' || userInfo?.role === 'eventadder')) {
         setIsAllowed(true);
       } else {
         alert('Bu sayfaya erişim izniniz yok.');
@@ -51,7 +54,7 @@ function AddEvent() {
       return;
     }
 
-    if (!title || !startDate || !startTime || !endDate || !endTime || !description) {
+    if (!title || !startDate || !startTime || !endDate || !endTime || !description || !category) {
       alert('Lütfen tüm alanları doldurun.');
       return;
     }
@@ -61,8 +64,12 @@ function AddEvent() {
         startDateTime: eventStartDateTime.toISOString(),
         endDateTime: eventEndDateTime.toISOString(),
         description,
+        category,
         participants: [],
-        creator: auth.currentUser.email // Add creator information
+        creator: auth.currentUser.email, // existing creator email
+        creatorName: auth.currentUser.displayName, // new field for full name
+        createdAt: new Date().toISOString(), // added createdAt for publication timestamp
+        isAnonymous: isAnonymousEvent  // <-- New field added here.
       });
       alert('Etkinlik başarıyla eklendi!');
       setTitle('');
@@ -71,6 +78,7 @@ function AddEvent() {
       setEndDate('');
       setEndTime('');
       setDescription('');
+      setCategory('');
       navigate('/'); // Başarılı ekleme sonrası ana sayfaya yönlendirme
     } catch (error) {
       alert('Etkinlik eklenemedi: ' + error.message);
@@ -115,11 +123,32 @@ function AddEvent() {
         onChange={(e) => setEndTime(e.target.value)}
         required
       />
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        required
+      >
+        <option value="" disabled>--Kategori Seçin--</option>
+        <option value="spor">spor</option>
+        <option value="sanat">sanat</option>
+        <option value="edebiyat">edebiyat</option>
+        <option value="matematik">matematik</option>
+        <option value="bilim">bilim</option>
+        <option value="diğer">diğer</option>
+      </select>
       <textarea
         placeholder="Açıklama"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+      <label>
+        <input
+          type="checkbox"
+          checked={isAnonymousEvent}
+          onChange={(e) => setIsAnonymousEvent(e.target.checked)}
+        />
+        Anonim Etkinlik
+      </label>
       <button type="submit">Ekle</button>
       <button type="button" onClick={() => navigate(-1)}>Geri Dön</button>
     </form>
