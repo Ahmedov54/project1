@@ -54,17 +54,9 @@ function EventCard({
       <p>Oluşturan: {creatorFormatted}</p>
       {showParticipationButton && <ParticipationButton eventId={id} isParticipating={isParticipating} />}
       {showParticipationButton && (
-        isAnonymous ? (
-          // Eğer kullanıcı etkinliği oluşturan ya da admin değilse anonim bildirimi göster
-          isCreator || isAdmin ? (
-            <button onClick={() => setShowPopup(true)}>Katılımcıları Göster</button>
-          ) : (
-            <p>Bu etkinlik anonimdir, katılımcı bilgileri gizlidir.</p>
-          )
-        ) : (
-          sortedParticipants.length > 0 && (
-            <button onClick={() => setShowPopup(true)}>Katılımcıları Göster</button>
-          )
+        // Removed anonymous check: always show the participation button if applicable.
+        sortedParticipants.length > 0 && (
+          <button onClick={() => setShowPopup(true)}>Katılımcıları Göster</button>
         )
       )}
       {(isCreator || handleDelete) && (

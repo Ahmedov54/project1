@@ -19,7 +19,7 @@ function Profile() {
   useEffect(() => {
     if (auth.currentUser) {
       setUserEmail(auth.currentUser.email);
-      setUserName(auth.currentUser.displayName || 'Anonim');
+      setUserName(auth.currentUser.displayName);
     }
 
     const fetchCreatedEvents = async () => {

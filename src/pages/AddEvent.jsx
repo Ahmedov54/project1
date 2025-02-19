@@ -14,7 +14,6 @@ function AddEvent() {
   const [description, setDescription] = useState('');
   const [isAllowed, setIsAllowed] = useState(false);
   const [category, setCategory] = useState('');
-  const [isAnonymousEvent, setIsAnonymousEvent] = useState(false);
   const navigate = useNavigate();
   const userInfo = useContext(UserContext);
   console.log(userInfo);
@@ -68,8 +67,7 @@ function AddEvent() {
         participants: [],
         creator: auth.currentUser.email, // existing creator email
         creatorName: auth.currentUser.displayName, // new field for full name
-        createdAt: new Date().toISOString(), // added createdAt for publication timestamp
-        isAnonymous: isAnonymousEvent  // <-- New field added here.
+        createdAt: new Date().toISOString() // added createdAt for publication timestamp
       });
       alert('Etkinlik başarıyla eklendi!');
       setTitle('');
@@ -141,14 +139,6 @@ function AddEvent() {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      <label>
-        <input
-          type="checkbox"
-          checked={isAnonymousEvent}
-          onChange={(e) => setIsAnonymousEvent(e.target.checked)}
-        />
-        Anonim Etkinlik
-      </label>
       <button type="submit">Ekle</button>
       <button type="button" onClick={() => navigate(-1)}>Geri Dön</button>
     </form>

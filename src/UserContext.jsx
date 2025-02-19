@@ -22,7 +22,7 @@ export const UserProvider = ({ children }) => {
           // Kullanıcı belgesi yoksa oluştur
           const userData = {
             email: user.email,
-            name: user.displayName || 'Anonim',
+            name: user.displayName, // fallback removed
             role: 'user' // Varsayılan rol
           };
           await setDoc(userDocRef, userData);

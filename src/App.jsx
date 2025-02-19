@@ -31,7 +31,7 @@ function App() {
         } else {
           const userData = {
             email: user.email,
-            name: user.displayName || 'Anonim',
+            name: user.displayName, // fallback removed
             role: 'user'
           };
           await setDoc(userDocRef, userData);
